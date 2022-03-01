@@ -135,7 +135,7 @@ def generate_fields_shifted_mask_cube(mask, chs=124,
     for i in range(4):
         for ch in range(chs/4):
             # for ch in params.VALID_SPECTRAL_CHS:
-            img_coded_mask_shifted = mask(:,:,i)
+            img_coded_mask_shifted = mask[:,:,i]
             shifted_mask[:, :, ch*chs/4+i] = img_coded_mask_shifted
 
     return shifted_mask

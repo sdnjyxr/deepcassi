@@ -89,7 +89,7 @@ def demo_recon(SINGLE_CASSI=False,
 
     if SSCSI:
         mask3d = modulation.shift_random_mask(mask_2d, chs=img_chs, shift=0.1)
-    else if SINGLE_CASSI:
+    elif SINGLE_CASSI:
         mask3d = modulation.generate_shifted_mask_cube(mask_2d,chs=img_chs,shift_list=list_dispersion,
                                                         shift_list_y=np.zeros(shape=(1,img_chs)), SINGLE_CASSI=SINGLE_CASSI)
     else:
