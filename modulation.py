@@ -55,6 +55,11 @@ def generate_random_mask(h=512, w=512, scale=1):
         mask = cv2.resize(mask, dsize=(w, h), interpolation=cv2.INTER_NEAREST)
     return mask
 
+def generate_fields_random_mask(h=512, w=512, scale=1):
+    mask = np.random.randint(0, 2, size=(int(h / scale), int(w / scale), 4)).astype(np.float32)
+    if scale != 1.0:
+        mask = cv2.resize(mask, dsize=(w, h), interpolation=cv2.INTER_NEAREST)
+    return mask
 
 def shift_random_mask(mask, chs=31, shift=0.1):
     h, w = mask.shape
@@ -119,6 +124,21 @@ def generate_shifted_mask_cube(mask, chs=31,
 
     return shifted_mask
 
+def generate_fields_shifted_mask_cube(mask, chs=124,
+                               shift_list=shift_ours,
+                               shift_list_y=np.zeros(shape=(1,124)),
+                               FIELD_CASSI=False):
+    h, w = mask.shape
+    shifted_mask = np.zeros(shape=(h, w, chs/4), dtype=mask.dtype)
+
+    # disperse the coded mask
+    for i in range(4):
+        for ch in range(chs/4):
+            # for ch in params.VALID_SPECTRAL_CHS:
+            img_coded_mask_shifted = mask(:,:,i)
+            shifted_mask[:, :, ch*chs/4+i] = img_coded_mask_shifted
+
+    return shifted_mask
 
 def generate_coded_image(img_hs, mask, chs=31, SINGLE_CASSI=False, shift_list=shift_ours):
     img_masked = np.multiply(img_hs, mask)

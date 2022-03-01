@@ -46,6 +46,7 @@ import autoencoder.model as ae_model
 import recon.snapshot.reconstruction as HQHS_recon
 
 def demo_recon(SINGLE_CASSI=False,
+                FIELD_CASSI=FIELD_CASSI,
                SSCSI=True,
                rho=1e-01,
                sparsity=1e-02,
@@ -74,20 +75,26 @@ def demo_recon(SINGLE_CASSI=False,
     gt_hs = gt_hs.astype(np.float32) / 65535.0
 
     img_h, img_w, img_chs = gt_hs.shape
-    mask_2d = modulation.generate_random_mask(h=img_h, w=img_w, scale=1.0)
+    if FIELD_CASSI:
+        mask_2d = modulation.generate_fields_random_mask(h=img_h, w=img_w, scale=1.0)
+    else:
+        mask_2d = modulation.generate_random_mask(h=img_h, w=img_w, scale=1.0)
 
     # generate coded image
     list_dispersion = np.arange(0, img_chs)
-    if SINGLE_CASSI:
-        list_dispersion = np.floor(list_dispersion * 0.5)
-        list_dispersion = list_dispersion.astype(dtype=np.int32)
+    if SINGLE_CASSI | FIELD_CASSI:
+        # list_dispersion = np.floor(list_dispersion * 0.5)
+        # list_dispersion = list_dispersion.astype(dtype=np.int32)
         print(list_dispersion)
 
     if SSCSI:
         mask3d = modulation.shift_random_mask(mask_2d, chs=img_chs, shift=0.1)
-    else:
+    else if SINGLE_CASSI:
         mask3d = modulation.generate_shifted_mask_cube(mask_2d,chs=img_chs,shift_list=list_dispersion,
-                                                       SINGLE_CASSI=SINGLE_CASSI)
+                                                        shift_list_y=np.zeros(shape=(1,img_chs)), SINGLE_CASSI=SINGLE_CASSI)
+    else:
+        mask3d = modulation.generate_fields_shifted_mask_cube(mask_2d,chs=img_chs,shift_list=list_dispersion,
+                                                        shift_list_y=np.zeros(shape=(1,img_chs)), FIELD_CASSI=FIELD_CASSI)
 
     img_snapshot = modulation.generate_coded_image(gt_hs, mask3d, chs=img_chs,
                                                    SINGLE_CASSI=SINGLE_CASSI,
@@ -172,8 +179,9 @@ def demo_recon_synthetic_KAIST():
     #########################################################
     # Select Modulation Type
     #########################################################
-    SINGLE_CASSI = True
+    SINGLE_CASSI = False
     SSCSI = False
+    FIELD_CASSI = True
 
     #########################################################
     # params for KAIST dataset
@@ -193,6 +201,7 @@ def demo_recon_synthetic_KAIST():
     # Do recon
     #########################################################
     demo_recon(SINGLE_CASSI=SINGLE_CASSI,
+                FIELD_CASSI=FIELD_CASSI,
                SSCSI=SSCSI,
                rho=rho,
                sparsity=sparsity,
